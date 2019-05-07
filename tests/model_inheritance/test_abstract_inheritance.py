@@ -5,6 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.checks import Error
 from django.core.exceptions import FieldDoesNotExist, FieldError
 from django.db import models
+from django.db.models.query_utils import DeferredAttribute
 from django.test import SimpleTestCase
 from django.test.utils import isolate_apps
 
@@ -60,7 +61,7 @@ class AbstractInheritanceTests(SimpleTestCase):
 
         self.assertEqual(DescendantOne._meta.get_field('name').max_length, 30)
         self.assertEqual(DescendantTwo._meta.get_field('name').max_length, 50)
-        self.assertEqual(Derived._meta.get_field('name').max_length, 50)
+        self.assertEqual(Derived._meta.get_field('name').max_length, 30)
 
     def test_multiple_inheritance_cannot_shadow_concrete_inherited_field(self):
         class ConcreteParent(models.Model):
@@ -351,3 +352,12 @@ class AbstractInheritanceTests(SimpleTestCase):
                 ('name', models.CharField),
             ]
         )
+
+    def test_shadow_class_attribute_with_field(self):
+        class Base(models.Model):
+            foo = 1
+
+        class Inherited(Base):
+            foo = models.IntegerField()
+
+        self.assertEqual(type(Inherited.foo), DeferredAttribute)

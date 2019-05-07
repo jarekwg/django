@@ -737,7 +737,8 @@ class Field(RegisterLookupMixin):
             # Don't override classmethods with the descriptor. This means that
             # if you have a classmethod and a field with the same name, then
             # such fields can't be deferred (we don't have a check for this).
-            if not getattr(cls, self.attname, None):
+            existing_attr = getattr(cls, self.attname, None)
+            if existing_attr is None or not callable(existing_attr):
                 setattr(cls, self.attname, DeferredAttribute(self.attname))
         if self.choices is not None:
             setattr(cls, 'get_%s_display' % self.name,
