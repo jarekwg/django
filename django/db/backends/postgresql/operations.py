@@ -3,6 +3,8 @@ from psycopg2.extras import Inet
 from django.conf import settings
 from django.db.backends.base.operations import BaseDatabaseOperations
 
+from .constants import IDENTIFIER_MAX_LENGTH
+
 
 class DatabaseOperations(BaseDatabaseOperations):
     cast_char_field_without_max_length = 'varchar'
@@ -194,14 +196,11 @@ class DatabaseOperations(BaseDatabaseOperations):
         """
         Return the maximum length of an identifier.
 
-        The maximum length of an identifier is 63 by default, but can be
-        changed by recompiling PostgreSQL after editing the NAMEDATALEN
-        macro in src/include/pg_config_manual.h.
-
-        This implementation returns 63, but can be overridden by a custom
-        database backend that inherits most of its behavior from this one.
+        This implementation returns the postgresql default, but can be
+        overridden by a custom database backend that inherits most of its
+        behavior from this one.
         """
-        return 63
+        return IDENTIFIER_MAX_LENGTH
 
     def distinct_sql(self, fields, params):
         if fields:

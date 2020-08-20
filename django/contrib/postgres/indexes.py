@@ -1,6 +1,6 @@
 from django.db import NotSupportedError
+from django.db.backends.postgresql.constants import IDENTIFIER_MAX_LENGTH
 from django.db.models import Index
-from django.utils.functional import cached_property
 
 __all__ = [
     'BloomIndex', 'BrinIndex', 'BTreeIndex', 'GinIndex', 'GistIndex',
@@ -9,14 +9,8 @@ __all__ = [
 
 
 class PostgresIndex(Index):
-
-    @cached_property
-    def max_name_length(self):
-        # Allow an index name longer than 30 characters when the suffix is
-        # longer than the usual 3 character limit. The 30 character limit for
-        # cross-database compatibility isn't applicable to PostgreSQL-specific
-        # indexes.
-        return Index.max_name_length - len(Index.suffix) + len(self.suffix)
+    # The max length of the name of the index
+    max_name_length = IDENTIFIER_MAX_LENGTH
 
     def create_sql(self, model, schema_editor, using='', **kwargs):
         self.check_supported(schema_editor)
